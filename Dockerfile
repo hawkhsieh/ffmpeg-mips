@@ -26,6 +26,15 @@ RUN cd /root/rtmpdump &&  \
     cp ./librtmp/log.h ${TOOLCHAIN_PATH}/include/librtmp  
 
 #
+# x264
+#
+COPY ./x264-snapshot-20161126-2245-stable /root/x264-snapshot-20161126-2245-stable
+#RUN cd /root/x264-snapshot-20161126-2245-stable && ./configure --host=mips-linux --prefix=/root/rsdk-1.5.5-5281-EB-2.6.30-0.9.30.3-110714/  --enable-static --disable-shared --disable-opencl --disable-asm
+RUN cd /root/x264-snapshot-20161126-2245-stable && \  
+    make && make install  
+
+
+#
 # ffmpeg
 #
 #RUN curl -Ls "https://github.com/FFmpeg/FFmpeg/archive/n3.2.tar.gz" | tar -zx -C /root
@@ -33,8 +42,8 @@ RUN mkdir /root/FFmpeg
 ADD ./FFmpeg/ /root/FFmpeg
 RUN cd /root/FFmpeg/ && ./configure --enable-cross-compile --arch=mips --target-os=linux --cross-prefix=mips-linux- --extra-ldflags=-static --extra-ldflags=-lrtmp \
 --disable-asm --disable-yasm --disable-optimizations --disable-inline-asm --disable-mipsfpu --disable-mips32r5 --disable-mips64r6 --disable-mipsdspr2 \
---disable-encoders \
---disable-decoders \
+--disable-encoders --enable-gpl --enable-libx264 --enable-encoder=libx264 \
+--disable-decoders --enable-decoder=h264 \
 --disable-muxers --enable-muxer=flv \
 --disable-demuxers --enable-demuxer=rtsp --enable-demuxer=flv \
 --disable-filters \
@@ -42,6 +51,7 @@ RUN cd /root/FFmpeg/ && ./configure --enable-cross-compile --arch=mips --target-
 --disable-avdevice --disable-parsers --disable-hwaccels --disable-bsfs --disable-indevs --disable-outdevs --disable-ffprobe --disable-ffserver \
 --enable-network \
 --enable-parser=aac --enable-parser=mpegvideo --enable-parser=h264 --enable-librtmp \
+--enable-ffprobe --enable-ffserver \
 --enable-debug
 
 RUN cd /root/FFmpeg/ && make
